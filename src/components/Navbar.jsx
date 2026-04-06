@@ -1,12 +1,14 @@
 import { useState } from "react";
+import { NavLink } from "react-router-dom";
 
-function Navbar({ page, setPage }) {
+function Navbar() {
     const [menuOpen, setMenuOpen] = useState(false);
 
-    const handleNavClick = (newPage) => {
-        setPage(newPage);
-        setMenuOpen(false);
-    };
+    const navItems = [
+        { path: "/", label: "Location" },
+        { path: "/employee", label: "Employee" },
+        { path: "/department", label: "Department" },
+    ];
 
     return (
         <div className="w-full bg-[#181825] shadow-lg">
@@ -14,24 +16,21 @@ function Navbar({ page, setPage }) {
                 <h1 className="text-xl md:text-2xl font-bold text-[#94e2d5]">Employee CRUD App</h1>
 
                 <div className="hidden md:flex items-center gap-4">
-                    <button
-                        className={`text-base md:text-lg font-medium transition-colors ${page === "location" ? "text-[#94e2d5]" : "text-gray-400 hover:text-[#cdd6f4]"}`}
-                        onClick={() => setPage("location")}
-                    >
-                        Location
-                    </button>
-                    <button
-                        className={`text-base md:text-lg font-medium transition-colors ${page === "employee" ? "text-[#94e2d5]" : "text-gray-400 hover:text-[#cdd6f4]"}`}
-                        onClick={() => setPage("employee")}
-                    >
-                        Employee
-                    </button>
-                    <button
-                        className={`text-base md:text-lg font-medium transition-colors ${page === "department" ? "text-[#94e2d5]" : "text-gray-400 hover:text-[#cdd6f4]"}`}
-                        onClick={() => setPage("department")}
-                    >
-                        Department
-                    </button>
+                    {navItems.map((item) => (
+                        <NavLink
+                            key={item.path}
+                            to={item.path}
+                            className={({ isActive }) =>
+                                `text-base md:text-lg font-medium transition-colors ${
+                                    isActive
+                                        ? "text-[#94e2d5]"
+                                        : "text-gray-400 hover:text-[#cdd6f4]"
+                                }`
+                            }
+                        >
+                            {item.label}
+                        </NavLink>
+                    ))}
                 </div>
 
                 <button
@@ -47,24 +46,22 @@ function Navbar({ page, setPage }) {
             {menuOpen && (
                 <div className="md:hidden bg-[#313244] border-t border-[#585b70]">
                     <div className="flex flex-col gap-2 p-4">
-                        <button
-                            className={`text-left px-4 py-2 rounded font-medium transition-colors ${page === "location" ? "bg-[#94e2d5] text-[#1e1e2e]" : "text-gray-400 hover:bg-[#45475a]"}`}
-                            onClick={() => handleNavClick("location")}
-                        >
-                            Location
-                        </button>
-                        <button
-                            className={`text-left px-4 py-2 rounded font-medium transition-colors ${page === "employee" ? "bg-[#94e2d5] text-[#1e1e2e]" : "text-gray-400 hover:bg-[#45475a]"}`}
-                            onClick={() => handleNavClick("employee")}
-                        >
-                            Employee
-                        </button>
-                        <button
-                            className={`text-left px-4 py-2 rounded font-medium transition-colors ${page === "department" ? "bg-[#94e2d5] text-[#1e1e2e]" : "text-gray-400 hover:bg-[#45475a]"}`}
-                            onClick={() => handleNavClick("department")}
-                        >
-                            Department
-                        </button>
+                        {navItems.map((item) => (
+                            <NavLink
+                                key={item.path}
+                                to={item.path}
+                                onClick={() => setMenuOpen(false)}
+                                className={({ isActive }) =>
+                                    `text-left px-4 py-2 rounded font-medium transition-colors ${
+                                        isActive
+                                            ? "bg-[#94e2d5] text-[#1e1e2e]"
+                                            : "text-gray-400 hover:bg-[#45475a]"
+                                    }`
+                                }
+                            >
+                                {item.label}
+                            </NavLink>
+                        ))}
                     </div>
                 </div>
             )}

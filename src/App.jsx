@@ -1,19 +1,20 @@
-import { useState } from "react";
+import { Routes, Route } from "react-router-dom";
 import Navbar from "./components/Navbar";
 import Location from "./pages/Location";
 import Employee from "./pages/Employee";
 import Department from "./pages/Department";
 
 function App() {
-  const [page, setPage] = useState("location");
-
   return (
     <div>
-      <Navbar page={page} setPage={setPage} />
+      <Navbar />
       <div className="p-6">
-        {page === "location" && <Location />}
-        {page === "employee" && <Employee />}
-        {page === "department" && <Department />}
+        <Routes>
+          <Route path="/" element={<Location />} />
+          <Route path="/location" element={<Location />} />
+          <Route path="/employee" element={<Employee />} />
+          <Route path="/department" element={<Department />} />
+        </Routes>
       </div>
     </div>
   );
