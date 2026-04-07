@@ -6,16 +6,16 @@ import Department from "./pages/Department";
 
 function App() {
   return (
-    <div>
+    <div className="min-h-screen">
       <Navbar />
-      <div className="p-6">
+      <main className="control-shell">
         <Routes>
           <Route path="/" element={<Location />} />
           <Route path="/location" element={<Location />} />
           <Route path="/employee" element={<Employee />} />
           <Route path="/department" element={<Department />} />
         </Routes>
-      </div>
+      </main>
     </div>
   );
 }

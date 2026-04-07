@@ -1,71 +1,94 @@
 import { useState } from "react";
 import { NavLink } from "react-router-dom";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import {
+    faBars,
+    faBuilding,
+    faGaugeHigh,
+    faLocationDot,
+    faUsers,
+    faXmark,
+} from "@fortawesome/free-solid-svg-icons";
 
 function Navbar() {
     const [menuOpen, setMenuOpen] = useState(false);
 
     const navItems = [
-        { path: "/", label: "Location" },
-        { path: "/employee", label: "Employee" },
-        { path: "/department", label: "Department" },
+        { path: "/location", label: "Locations", icon: faLocationDot },
+        { path: "/employee", label: "Employees", icon: faUsers },
+        { path: "/department", label: "Departments", icon: faBuilding },
     ];
 
     return (
-        <div className="w-full bg-[#181825] shadow-lg">
-            <div className="flex items-center justify-between p-4 md:p-6">
-                <h1 className="text-xl md:text-2xl font-bold text-[#94e2d5]">Employee CRUD App</h1>
+        <header className="sticky top-0 z-30 border-b border-[#45475a] bg-[#181825]/90 backdrop-blur-xl">
+            <div className="mx-auto flex w-[min(1240px,calc(100%-2rem))] items-center justify-between gap-4 py-4">
+                <NavLink
+                    to="/location"
+                    onClick={() => setMenuOpen(false)}
+                    className="flex items-center gap-3 rounded-xl border border-[#45475a] bg-[#313244]/70 px-4 py-2 text-[#cdd6f4]"
+                >
+                    <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#89b4fa] text-[#1e1e2e]">
+                        <FontAwesomeIcon icon={faGaugeHigh} />
+                    </span>
+                    <span>
+                        <span className="block text-xs uppercase tracking-[0.2em] text-[#a6adc8]">Control Panel</span>
+                        <span className="block text-sm font-bold md:text-base">Employee Operations</span>
+                    </span>
+                </NavLink>
 
-                <div className="hidden md:flex items-center gap-4">
+                <nav className="hidden items-center gap-2 md:flex">
                     {navItems.map((item) => (
                         <NavLink
                             key={item.path}
                             to={item.path}
                             className={({ isActive }) =>
-                                `text-base md:text-lg font-medium transition-colors ${
+                                `inline-flex items-center gap-2 rounded-lg border px-3 py-2 text-sm font-semibold transition-all ${
                                     isActive
-                                        ? "text-[#94e2d5]"
-                                        : "text-gray-400 hover:text-[#cdd6f4]"
+                                        ? "border-[#94e2d5] bg-[#94e2d5]/20 text-[#94e2d5]"
+                                        : "border-[#45475a] bg-[#313244]/60 text-[#bac2de] hover:border-[#6c7086] hover:text-[#cdd6f4]"
                                 }`
                             }
                         >
+                            <FontAwesomeIcon icon={item.icon} />
                             {item.label}
                         </NavLink>
                     ))}
-                </div>
+                </nav>
 
                 <button
-                    onClick={() => setMenuOpen(!menuOpen)}
-                    className="md:hidden flex flex-col gap-1 p-2 rounded hover:bg-[#313244] transition-colors"
+                    type="button"
+                    onClick={() => setMenuOpen((prev) => !prev)}
+                    className="inline-flex h-10 w-10 items-center justify-center rounded-lg border border-[#45475a] bg-[#313244] text-[#94e2d5] md:hidden"
+                    aria-label="Toggle navigation"
                 >
-                    <div className={`w-6 h-0.5 bg-[#94e2d5] transition-all ${menuOpen ? "rotate-45 translate-y-1.5" : ""}`}></div>
-                    <div className={`w-6 h-0.5 bg-[#94e2d5] transition-all ${menuOpen ? "opacity-0" : ""}`}></div>
-                    <div className={`w-6 h-0.5 bg-[#94e2d5] transition-all ${menuOpen ? "-rotate-45 -translate-y-1.5" : ""}`}></div>
+                    <FontAwesomeIcon icon={menuOpen ? faXmark : faBars} />
                 </button>
             </div>
 
             {menuOpen && (
-                <div className="md:hidden bg-[#313244] border-t border-[#585b70]">
-                    <div className="flex flex-col gap-2 p-4">
+                <div className="border-t border-[#45475a] bg-[#1e1e2e] md:hidden">
+                    <div className="mx-auto flex w-[min(1240px,calc(100%-2rem))] flex-col gap-2 py-4">
                         {navItems.map((item) => (
                             <NavLink
                                 key={item.path}
                                 to={item.path}
                                 onClick={() => setMenuOpen(false)}
                                 className={({ isActive }) =>
-                                    `text-left px-4 py-2 rounded font-medium transition-colors ${
+                                    `inline-flex items-center gap-3 rounded-lg border px-3 py-2 text-sm font-semibold ${
                                         isActive
-                                            ? "bg-[#94e2d5] text-[#1e1e2e]"
-                                            : "text-gray-400 hover:bg-[#45475a]"
+                                            ? "border-[#94e2d5] bg-[#94e2d5]/20 text-[#94e2d5]"
+                                            : "border-[#45475a] bg-[#313244]/60 text-[#bac2de]"
                                     }`
                                 }
                             >
+                                <FontAwesomeIcon icon={item.icon} />
                                 {item.label}
                             </NavLink>
                         ))}
                     </div>
                 </div>
             )}
-        </div>
+        </header>
     );
 }
 
