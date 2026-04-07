@@ -12,6 +12,7 @@ import {
   faTrashCan,
 } from "@fortawesome/free-solid-svg-icons";
 import ResponseDisplay from "../components/ResponseDisplay";
+import { useToaster } from "../components/ToastProvider";
 
 const BASE_URL = "https://employee.azaken.com/api";
 const EMPTY_DEPARTMENT = {
@@ -22,6 +23,7 @@ const EMPTY_DEPARTMENT = {
 };
 
 function Department() {
+  const toaster = useToaster();
   const [response, setResponse] = useState(null);
   const [loading, setLoading] = useState(false);
   const [lookupId, setLookupId] = useState("");
@@ -48,14 +50,54 @@ function Department() {
     }
   };
 
+  const deriveMessage = (payload, fallbackMessage) => {
+    if (typeof payload === "string" && payload.trim()) {
+      return payload;
+    }
+
+    if (payload && typeof payload === "object") {
+      if (typeof payload.message === "string" && payload.message.trim()) {
+        return payload.message;
+      }
+
+      if (typeof payload.error === "string" && payload.error.trim()) {
+        return payload.error;
+      }
+    }
+
+    return fallbackMessage;
+  };
+
   const runRequest = async (method, endpoint, options = {}) => {
     setLoading(true);
     try {
       const res = await fetch(`${BASE_URL}${endpoint}`, options);
       const data = await parsePayload(res, method);
       setResponse({ method, endpoint, data, status: res.status });
+
+      if (!res.ok) {
+        toaster.error(
+          deriveMessage(data, `Request failed with status ${res.status}.`),
+          "Department request failed",
+        );
+        return;
+      }
+
+      if (method === "GET" && Array.isArray(data)) {
+        toaster.success(
+          `Loaded ${data.length} department record${data.length === 1 ? "" : "s"}.`,
+          "Departments loaded",
+        );
+        return;
+      }
+
+      toaster.success(
+        deriveMessage(data, `${method} department request completed successfully.`),
+        "Department action complete",
+      );
     } catch (err) {
       setResponse({ method, endpoint, error: err.message });
+      toaster.error(err.message || "Could not connect to the department service.", "Network error");
     } finally {
       setLoading(false);
     }
@@ -71,7 +113,7 @@ function Department() {
   const handleGetById = async (event) => {
     event.preventDefault();
     if (!lookupId.trim()) {
-      alert("Please enter a Department ID");
+      toaster.warning("Enter a department ID before searching.", "Department ID required");
       return;
     }
     await runRequest("GET", `/departments/${lookupId}`);
@@ -80,7 +122,7 @@ function Department() {
   const handlePost = async (event) => {
     event.preventDefault();
     if (!hasRequiredFields(createData)) {
-      alert("Please fill in all required fields");
+      toaster.warning("Fill all required fields before creating a department.", "Missing required fields");
       return;
     }
     await runRequest("POST", "/departments", {
@@ -93,7 +135,7 @@ function Department() {
   const handlePut = async (event) => {
     event.preventDefault();
     if (!updateId.trim() || !hasRequiredFields(updateData)) {
-      alert("Please fill in all fields");
+      toaster.warning("Enter the department ID and all required fields before updating.", "Update details missing");
       return;
     }
     await runRequest("PUT", `/departments/${updateId}`, {
@@ -106,7 +148,7 @@ function Department() {
   const handleDelete = async (event) => {
     event.preventDefault();
     if (!deleteId.trim()) {
-      alert("Please enter a Department ID");
+      toaster.warning("Enter a department ID before deleting.", "Department ID required");
       return;
     }
     await runRequest("DELETE", `/departments/${deleteId}`, {

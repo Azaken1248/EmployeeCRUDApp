@@ -12,11 +12,13 @@ import {
   faTrashCan,
 } from "@fortawesome/free-solid-svg-icons";
 import ResponseDisplay from "../components/ResponseDisplay";
+import { useToaster } from "../components/ToastProvider";
 
 const BASE_URL = "https://employee.azaken.com/api";
 const EMPTY_LOCATION = { city: "", state: "", country: "" };
 
 function Location() {
+  const toaster = useToaster();
   const [response, setResponse] = useState(null);
   const [loading, setLoading] = useState(false);
   const [lookupId, setLookupId] = useState("");
@@ -41,14 +43,54 @@ function Location() {
     }
   };
 
+  const deriveMessage = (payload, fallbackMessage) => {
+    if (typeof payload === "string" && payload.trim()) {
+      return payload;
+    }
+
+    if (payload && typeof payload === "object") {
+      if (typeof payload.message === "string" && payload.message.trim()) {
+        return payload.message;
+      }
+
+      if (typeof payload.error === "string" && payload.error.trim()) {
+        return payload.error;
+      }
+    }
+
+    return fallbackMessage;
+  };
+
   const runRequest = async (method, endpoint, options = {}) => {
     setLoading(true);
     try {
       const res = await fetch(`${BASE_URL}${endpoint}`, options);
       const data = await parsePayload(res, method);
       setResponse({ method, endpoint, data, status: res.status });
+
+      if (!res.ok) {
+        toaster.error(
+          deriveMessage(data, `Request failed with status ${res.status}.`),
+          "Location request failed",
+        );
+        return;
+      }
+
+      if (method === "GET" && Array.isArray(data)) {
+        toaster.success(
+          `Loaded ${data.length} location record${data.length === 1 ? "" : "s"}.`,
+          "Locations loaded",
+        );
+        return;
+      }
+
+      toaster.success(
+        deriveMessage(data, `${method} location request completed successfully.`),
+        "Location action complete",
+      );
     } catch (err) {
       setResponse({ method, endpoint, error: err.message });
+      toaster.error(err.message || "Could not connect to the location service.", "Network error");
     } finally {
       setLoading(false);
     }
@@ -64,7 +106,7 @@ function Location() {
   const handleGetById = async (event) => {
     event.preventDefault();
     if (!lookupId.trim()) {
-      alert("Please enter a Location ID");
+      toaster.warning("Enter a location ID before searching.", "Location ID required");
       return;
     }
     await runRequest("GET", `/locations/${lookupId}`);
@@ -73,7 +115,7 @@ function Location() {
   const handlePost = async (event) => {
     event.preventDefault();
     if (!hasRequiredFields(createData)) {
-      alert("Please fill in all required fields");
+      toaster.warning("Fill all required fields before creating a location.", "Missing required fields");
       return;
     }
     await runRequest("POST", "/locations", {
@@ -86,7 +128,7 @@ function Location() {
   const handlePut = async (event) => {
     event.preventDefault();
     if (!updateId.trim() || !hasRequiredFields(updateData)) {
-      alert("Please fill in all fields");
+      toaster.warning("Enter the location ID and all required fields before updating.", "Update details missing");
       return;
     }
     await runRequest("PUT", `/locations/${updateId}`, {
@@ -99,7 +141,7 @@ function Location() {
   const handleDelete = async (event) => {
     event.preventDefault();
     if (!deleteId.trim()) {
-      alert("Please enter a Location ID");
+      toaster.warning("Enter a location ID before deleting.", "Location ID required");
       return;
     }
     await runRequest("DELETE", `/locations/${deleteId}`, {
