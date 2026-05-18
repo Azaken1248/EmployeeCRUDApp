@@ -8,25 +8,27 @@ pipeline {
             }
         }
         
-        stage('Build Docker Image') {
+        stage('Build & Tag Image') {
             steps {
                 echo 'Building React/Nginx Docker Image...'
-                sh 'docker build -t employee-v2-frontend:latest .'
+                sh 'docker build -t registry.azaken.com/employee-v2-frontend:latest .'
+            }
+        }
+
+        stage('Push to Private Registry') {
+            steps {
+                echo 'Pushing to registry.azaken.com...'
+                sh 'docker push registry.azaken.com/employee-v2-frontend:latest'
             }
         }
         
-        stage('Deploy Frontend Container') {
+        stage('Deploy via Docker Compose') {
             steps {
-                echo 'Stopping and removing old container...'
-                sh 'docker rm -f employee-v2-app || true'
-                
-                echo 'Starting new container...'
+                echo 'Pulling new image and redeploying frontend...'
                 sh '''
-                docker run -d \
-                  --name employee-v2-app \
-                  -p 5001:80 \
-                  --restart unless-stopped \
-                  employee-v2-frontend:latest
+                cd ~/employee-deployment
+                docker-compose pull employee-v2-app
+                docker-compose up -d --no-deps employee-v2-app
                 '''
             }
         }
