@@ -26,7 +26,7 @@ pipeline {
             steps {
                 echo 'Pulling new image and redeploying frontend...'
                 sh '''
-                cd /home/aza/employee-deployment
+                cd /opt/employee-deployment
                 docker-compose pull employee-v2-app
                 docker-compose up -d --no-deps employee-v2-app
                 '''
